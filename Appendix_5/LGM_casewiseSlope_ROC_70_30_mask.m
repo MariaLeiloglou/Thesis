@@ -74,8 +74,12 @@ mat = dir('*.mat');
      save([filenamenew,'_TEXTURE_logitmodel_70_30.mat'],'mdl');%we save the trained model
      %mdl=fitcsvm(predtrain,resptrain,'Standardize',true);%this line trains the SVM model
      %mdlSVM = fitPosterior(mdl);%this line trains the SVM model
+     %threshold=-(mdlSVM.Bias)/mdlSVM.Beta;%for SVM
+     %sd=std(predtrain);%for SVM
+     %av=mean(predtrain);%for SVM
+     %optimalthreshold=threshold*sd+av;%identified by the SVM as the threshold above which is tumour
      %cd('/Users/marialeiloglou/Documents/GitHub/Thesis/Appendix_5/Results/TextureSlope_Case_Wise');%change current folder
-     %save([filenamenew,'_TEXTURE_SVMmodel_70_30.mat'],'mdlSVM');%we save the trained model
+     %save([filenamenew,'_TEXTURE_SVMmodel_70_30.mat'],'mdlSVM','optimalthreshold');%we save the trained model
      
 
 
@@ -89,12 +93,13 @@ mat = dir('*.mat');
 
      Figure1=figure;
      scatter(predtrain,resptrain);hold on;
+     %line([optimalthreshold optimalthreshold],[0 1],'color','k');%SVM
      scatter(xxnew,score,'r','.');
      title('Training of logistic regression model 70% of data');
      %title('Training of SVM model 70% of data');
      xlabel('slope value');ylabel('classification');
      legend('data','logistic regression model');
-     %legend('data','SVM model');%same for the SVM model
+     %legend('data','threshold','SVM model');%same for the SVM model
      saveas(Figure1,[filenamenew,'_Training of logistic regression_30percentofdata.fig']);
      saveas(Figure1,[filenamenew,'_Training of logistic regression_30percentofdata.png']);
      
@@ -178,55 +183,7 @@ mat = dir('*.mat');
      %one of the pixels in fluorescence image
      propabilitymap=zeros(s1,s2);%preallocation for the pseudocolour map
      %one pixel corresponds to this value in [mm]
-     pixeldimension=[ 0.0422164
-     0.03769
-     0.03769
-     0.04050978
-     0.03764705
-     0.04336
-     0.038186
-     0.038186
-     0.04
-     0.0493066
-     0.041184
-     0.0344086
-     0.0448808
-     0.0434783
-     0.0448179
-     0.0448808
-     0.0402516
-     0.0402516
-     0.0422164
-     0.04290655
-     0.0435967
-     0.0380499
-     0.0375147
-     0.0377358
-     0.0376028
-     0.0453258
-     0.0460432
-     0.0321285
-     0.0319043
-     0.0340426
-     0.0425532
-     0.0424967
-     0.0415584
-     0.0425532
-     0.0427236
-     0.0421053
-     0.042838
-     0.0427807
-     0.0474074
-     0.0344828
-     0.0430686
-     0.0461095
-     0.0382775
-     0.0380952
-     0.0380952
-     0.0382775
-     0.03950617
-     0.0395062
-     0.0458453];
+     pixeldimension=[0.0422164];
      res=1./((50*64).*pixeldimension);%resolution input to function raPsd2d
      res1=res(q);
      cd('/Users/marialeiloglou/Documents/GitHub/Thesis/Appendix_5');
