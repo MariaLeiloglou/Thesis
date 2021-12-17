@@ -1,6 +1,5 @@
 %Maria Leiloglou 06_10_2018
-%this code calculates the mean and standard 
-%deviation of fluorescence and background samples in the image
+%this code calculates the SNR in the fluorescence image
 clc;
 clear all
 close all
@@ -37,4 +36,4 @@ NonFlmean=mean(sample2);%mean of background pixel values in the sample
 NonFlsd=std(sample2);%standard deviation of background pixel values in the sample
 
 
-save(['SNR_data',filenamenew,'.mat'],'Flmean','Flsd','NonFlmean','NonFlsd');
+save(['SNR',filenamenew,'.mat'],'Flmean','Flsd','NonFlmean','NonFlsd');
