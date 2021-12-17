@@ -56,17 +56,17 @@ saveas(Figure1,'Modulation_Trasfer_Function.fig');
 saveas(Figure1,'Modulation_Trasfer_Function.png');
 
 for i=1:6 %for each element
-    if Cmatrix(1,i)<Climit %if the contrast is below the limit
-        if i>1 %only if we are not inn the first element of the group
-           resolution=spatialfrequency(1,i-1);%save the previous element's spatial frequency as the resolution
+    if Cmatrix(1,i)<Climit
+        if i>1
+           resolution=spatialfrequency(1,i-1);%when the contrast of an
            save('resolution_in_lp_per_mm.mat','resolution');
            break
-        else %if we are in the first element of the group
-           disp('Please try a group of lower spatial frequencies');%means we need to try another group of lower spatial frequencies
+        else 
+           disp('Please try a group of lower spatial frequencies');
         break
         end
-    elseif Cmatrix(1,i)>=Climit && i==6 %if the contrast of all elements are above the limit
-        disp('Please try a group of higher spatial frequencies');% we need to use groups of higher spatial frequencies
+    elseif Cmatrix(1,i)>=Climit && i==6
+        disp('Please try a group of higher spatial frequencies');
    end
 end
 
