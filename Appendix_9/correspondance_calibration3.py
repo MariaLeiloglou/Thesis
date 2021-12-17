@@ -4,14 +4,15 @@ import numpy as np
 
 # Open video file
 rootdir = os.path.dirname(os.path.realpath('__file__'))
-# name = rootdir + '\\' + 'Data' + '\\' + 'hand' + '\\' + 'valleyHand_0'
-name = r'/Users/marialeiloglou/Desktop/appearance2/appearance_2.avi'
+
+# Open video file
+name = r'/Users/marialeiloglou//Documents/GitHub/Thesis/Appendix_9/appearance_2.avi'
 cap = cv2.VideoCapture(name)
 i = 1
 j = 1 # fibre label
 tracked_spots = 0
-radi = [] # we find in the difference image in every loop
-centers= []
+radi = [] # preallocation for spots' radi
+centers= [] # preallocation for spots' centers
 
 
 DELTA_BACKG_INTENS = 5
@@ -84,14 +85,14 @@ while (cap.isOpened()):
 cap.release()
 
 
-id = 0
+number = 0
 
 # show labeling with the mask
 for c in centers:
-   id += 1
-   labels = cv2.putText(mask, str(id), (int(round(c[1]) - 10), int(round(c[0]) + 10)), cv2.FONT_HERSHEY_PLAIN, 1, (255, 255, 255), 2)
+ number += 1
+ labels = cv2.putText(mask, str(number), (int(round(c[1]) - 10), int(round(c[0]) + 10)), cv2.FONT_HERSHEY_PLAIN, 1, (255, 255, 255), 2)
 
-cv2.imwrite(r'all spots.png', labels)# save labeled mask
+cv2.imwrite(r'all spots.png', labels)  # save labeled mask
 
 # save calibration file
 
