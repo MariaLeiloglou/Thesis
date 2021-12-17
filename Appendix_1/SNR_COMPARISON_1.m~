@@ -43,9 +43,9 @@ for i=1:2
         FluorT=reshape(FluorT,1,numel(FluorT));
         NonFluorT=reshape(NonFluorT,1,numel(NonFluorT));
         S(i,j)=mean(FluorT);%mean from fluorescence signal sample
-        B(i,j)=mean(NonFluorT);%mean from background signal sample
-        Flsd(i,j)=std(FluorT);%standard deviation from fluorescence signal sample
-        sd(i,j)=std(NonFluorT);%standard deviation from background signal sample
+        B(i,j)=mean(NonFluorT);
+        Flsd(i,j)=std(FluorT);%standard deviati
+        sd(i,j)=std(NonFluorT);
     end
 end
 difference=S-B;
@@ -130,5 +130,4 @@ else
         disp('and there is not a significant difference between the methods at 10% significance level (one-tailed)');
     end 
 end
-cd('/Users/marialeiloglou/Documents/GitHub/Thesis/Appendix_1/results');
-save('meat_PBS_stock_425_625vs500_625.mat','Fcrit','Ftest','tcrit','ttest','SNR1mean','SD1','SNR2mean','SD2');
+save('meat_methanol_stock_425_625vs500_625.mat','Fcrit','Ftest','tcrit','ttest','SNR1mean','SD1','SNR2mean','SD2');
