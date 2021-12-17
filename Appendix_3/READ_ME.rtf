@@ -5,25 +5,12 @@
 \paperw11900\paperh16840\margl1440\margr1440\vieww10800\viewh8400\viewkind0
 \pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
 
-\f0\fs24 \cf2 Code: \'92extract.m\'92 calculates the mean and standard \
-\pard\pardeftab720\partightenfactor0
-\cf2 %eviation of fluorescence and background samples in the image.\
-\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
-\cf2 Details can be found in the code and below input/output is given:\
+\f0\fs24 \cf2 Code: \'92LOD.m\'92 calculates the lowest detectable concentration for a given set of SNR values at different concentrations .\
+Details can be found in the code and below input/output is given:\
 \
 Input:\
 \
-Image with fluorescence solution, for example the image \'91fluorescence_solution_image.png\'92 in this folder.\
-\
-User is prompt to chose a pixel of the fluorescence solution that is the corner of the square pixel values sample\
-\
-User is prompt to chose a pixel of the background that is the corner of the square pixel values sample \
-\
-\
-Output:\
-\
-\'91SNR_datafluorescence_solution_image.mat\'92 file in this folder with:\
-\
+\'91SNR.mat\'92 file sin folder \'91data\'92 with:\
 \pard\pardeftab720\partightenfactor0
 \cf2 'Flmean1\'92: mean of fluorescence pixel values in the sample\
 \
@@ -32,10 +19,20 @@ Output:\
 \'92Bgrdmean1\'92: mean of background pixel values in the sample\
 \
 \'92Bgrdstd1\'92: standard deviation of background pixel values in the sample\
-\pard\pardeftab720\partightenfactor0
-
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+\cf2 \
+\
+Output:\
+\
+\'91Sensitivity_measurements.fig\'92 in Results folder:\
+Plot of SNR versus concentration\
+\
+'lod_in_nM.mat'in Results folder:\
+With the old: lowest detectable concentration -here is missing as all of the concentrations were detectable-
 \f1 \cf0 \
 \
+\pard\pardeftab720\partightenfactor0
+\cf0 \
 \pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
 
 \f0 \cf2 \

@@ -21,8 +21,8 @@ close figure 1
 sample=im(r1:r1+windo-1,c1:c1+windo-1);%this is the sample with fluorescence pixel values
 sample= double(sample);
 sample=reshape(sample,1,numel(sample));
-Flmean=mean(sample);%mean of fluorescence pixel values in the sample
-Flsd=std(sample);%standard deviation of fluorescence pixel values in the sample
+Flmean1=mean(sample);%mean of fluorescence pixel values in the sample
+Flstd1=std(sample);%standard deviation of fluorescence pixel values in the sample
 
 sample2=zeros(windo,windo);
 waitfor(msgbox('Choose an background pixel'));
@@ -33,8 +33,8 @@ close figure 2
 sample2=im(r2:r2+windo-1,c1:c1+windo-1);%this is the sample with background pixel values
 sample2= double(sample2);
 sample2=reshape(sample2,1,numel(sample2));
-NonFlmean=mean(sample2);%mean of background pixel values in the sample
-NonFlsd=std(sample2);%standard deviation of background pixel values in the sample
+Bgrdmean1=mean(sample2);%mean of background pixel values in the sample
+Bgrdstd1=std(sample2);%standard deviation of background pixel values in the sample
 
 
-save(['SNR_data',filenamenew,'.mat'],'Flmean','Flsd','NonFlmean','NonFlsd');
+save(['SNR_',filenamenew,'.mat'],'Flmean1','Flstd1','Bgrdmean1','Bgrdstd1');

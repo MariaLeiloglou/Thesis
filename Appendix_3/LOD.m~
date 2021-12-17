@@ -1,0 +1,56 @@
+data%Maria Leiloglou 06_10_2018
+%this code inputs mean and standard deviation for signal and background
+%outputs figure of SNR with concentration
+ 
+clear all;
+close all;
+clc;
+Backgroundmean=zeros(11,1);%preallocation of background mean values of the 11 concentrations
+Backgroundstd=zeros(11,1);%preallocation of background standard deviation values of the 11 concentrations
+Signalmean=zeros(11,1);%preallocation of fluorescence mean values of the 11 concentrations
+Signalstd=zeros(11,1);%preallocation of fluorescence standard deviation values of the 11 concentrations
+SNR=zeros(11,1);%preallocation for the SNR of each concentration
+cd('/Users/marialeiloglou/Documents/GitHub/Thesis/Appendix_3/data');%change current folder
+for i=1:1:11% for the different concentrations
+    load(['SNR',num2str(i),'.mat']);%load the data from a specific concentration
+    Backgroundmean(i,1)=NonFlmean;%mean of background values
+    Backgroundstd(i,1)=NonFlsd;%standard deviation of background values
+    Signalmean(i,1)=Flmean;%mean of fluorescence values
+    Signalstd(i,1)=Flsd;%standard deviation of fluorescence values
+    SNR(i,1)=(Signalmean(i,1)-Backgroundmean(i,1))/Backgroundstd(i,1);%calculate the SNR
+end
+ 
+C=[1 10 20 30 40 50 60 70 80 90 100]; %nanoMolar concentrations of the solutions
+%create figure with SNR for specific lens configuration
+Figure1=figure;
+scatter(C,SNR,'blue');hold on;
+xlabel('concentration (nM)'); ylabel('SNR');  
+ylim([0 max(SNR)+1]);
+%example for specific working distance of 55.8 cm
+%and lens configuration focal length of 70 mm and f/2.8
+title('f28fl70wd558');hold on;
+hline = refline([0 3.28]);%SNR above 3.28 is acceptable
+hline.Color = 'r';
+saveas(Figure1,'Sensitivity_measurements.fig');
+saveas(Figure1,'Sensitivity_measurements.png');
+
+
+for i=1:11 %for each concentration
+    if SNR(1,i)<Climit %if the contrast is below the limit
+        if i>1 %only if we are not inn the first element of the group
+           resolution=spatialfrequency(1,i-1);%save the previous element's spatial frequency as the resolution
+           save('resolution_in_lp_per_mm.mat','resolution');
+           break
+        else %if we are in the first element of the group
+           disp('Please try a group of lower spatial frequencies');%means we need to try another group of lower spatial frequencies
+        break
+        end
+    elseif Cmatrix(1,i)>=Climit && i==6 %if the contrast of all elements are above the limit
+        disp('Please try a group of higher spatial frequencies');% we need to use groups of higher spatial frequencies
+   end
+end
+
+ 
+
+
+
