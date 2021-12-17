@@ -3,6 +3,7 @@
 clc;
 clear all;
 close all;
+
 %go to the folder with the slope of PSD curves values 
 %extracted from the healthy and tumour parts
 %of the image you work on
@@ -44,8 +45,8 @@ mat = dir('*.mat');
 
      trainmalignantnumber=round(malignantnumber/1.43);%100/70->number of 70% of tumour data
      trainbenignnumber=round(benignnumber/1.43);%100/70->number of 70% of healthy data
-     validmalignantnumber=round(malignantnumber/3.33);%100/30->number of 15% of tumour data
-     validbenignnumber=round(benignnumber/3.33);%100/30->number of 15% of healthy data
+     validmalignantnumber=round(malignantnumber/3.33);%100/30->number of 30% of tumour data
+     validbenignnumber=round(benignnumber/3.33);%100/30->number of 30% of healthy data
 
      predtrain=zeros(trainmalignantnumber+trainbenignnumber,1);%preallocation to store the slope values (only the data for training)
      resptrain=zeros(trainmalignantnumber+trainbenignnumber,1);%preallocation to store the classification: 1 for tumour, 0 for healthy (only the data for training)
@@ -67,20 +68,32 @@ mat = dir('*.mat');
      else
 
      resptrain=logical(resptrain);
+     
      %the below trains the model
-
      mdl=fitglm(predtrain,resptrain,'Distribution','binomial');%this line trains the logistic regression model
      cd('/Users/marialeiloglou/Documents/GitHub/Thesis/Appendix_5/Results/TextureSlope_Case_Wise');%change current folder
      save([filenamenew,'_TEXTURE_logitmodel_70_30.mat'],'mdl');%we save the trained model
      %mdl=fitcsvm(predtrain,resptrain,'Standardize',true);%this line trains the SVM model
      %mdlSVM = fitPosterior(mdl);%this line trains the SVM model
-     %threshold=-(mdlSVM.Bias)/mdlSVM.Beta;
-     %sd=std(predtrain);
-     %av=mean(predtrain);
-     %optimalthreshold=threshold*sd+av;%we use this instead, it is the pixel value identified by the SVM as the threshold above which is tumour
+     
+     %find the classification threshold 
+     score_training=predict(mdl,predtrain);%use training data and trained model to predict responses
+     resptrain=logical(resptrain);%the ground truth
+     score_training=double(score_training);%the model's prediction
+     [Xt,Yt,Tt,AUCt,OPTt] = perfcurve(resptrain,score_training,'true');%ROC analysis to find threshold
+     opt1=Tt((Xt==OPTt(1))&(Yt==OPTt(2)));%threshold of probability found by ROC curve (this is the probability not the slope value)
+     fit_intercept=mdl.Coefficients{1,1};%this is the logit fit's intercept
+     fit_slope=mdl.Coefficients{2,1};%this is the logit fit's slope
+     optimalthreshold=((log(opt1/(1-opt1)))-fit_intercept)/(fit_slope);%this is the threshold but the predictor/ slope value threshold
+    
+     %threshold=-(mdlSVM.Bias)/mdlSVM.Beta;%for SVM
+     %sd=std(predtrain);%for SVM
+     %av=mean(predtrain);%for SVM
+     %optimalthreshold=threshold*sd+av;%identified by the SVM as the threshold above which is tumour
      %cd('/Users/marialeiloglou/Documents/GitHub/Thesis/Appendix_5/Results/TextureSlope_Case_Wise');%change current folder
      %save([filenamenew,'_TEXTURE_SVMmodel_70_30.mat'],'mdlSVM','optimalthreshold');%we save the trained model
      
+  
 
 
      %The below visualizes the training data and the OUTCOME OF THE TRAINED
@@ -93,13 +106,13 @@ mat = dir('*.mat');
 
      Figure1=figure;
      scatter(predtrain,resptrain);hold on;
-     
+     line([optimalthreshold optimalthreshold],[0 1],'color','k');
      scatter(xxnew,score,'r','.');
      title('Training of logistic regression model 70% of data');
      %title('Training of SVM model 70% of data');
      xlabel('slope value');ylabel('classification');
-     legend('data','logistic regression model');
-     %legend('data','SVM model');%same for the SVM model
+     legend('data','threshold','logistic regression model');
+     %legend('data','threshold','SVM model');%same for the SVM model
      saveas(Figure1,[filenamenew,'_Training of logistic regression_30percentofdata.fig']);
      saveas(Figure1,[filenamenew,'_Training of logistic regression_30percentofdata.png']);
      
@@ -108,28 +121,40 @@ mat = dir('*.mat');
      
      %The below validates the model-uses the already trained model to make
      %predictions on new data and compares these predictions with the ground
-     %trouth
-     score_log1=predict(mdl,predvalidation);%apply trained model to classify (0 or 1) for cancer for the new validation data
+     %truth
+     score_log1=predict(mdl,predvalidation);%apply trained model to predict responses for the new validation data
      %score_log1=predict(mdlSVM,predvalidation); %same for SVM model
      %the below visualizes the validation data (in blue circles) and the prediction of the
      %trained LR model for these data (in red curve)/again we can see the
      %learned threshold
      Figure2=figure;
      scatter(predvalidation,respvalidation);hold on;
+     line([optimalthreshold optimalthreshold],[0 1],'color','k');
      scatter(predvalidation,score_log1,'r','.');
      title('Validation of logistic regression model');
      %title('Validation of SVM model');%same for SVM model
      xlabel('slope value');ylabel('classification');
-     legend('data','Logistic Regression prediction');
+     legend('data','threshold','logistic regression model');
+     %legend('data','threshold','SVM model');%same for SVM model
      saveas(Figure2,[filenamenew,'_Validation of logit trained model_30percentofdata.fig']); 
      saveas(Figure2,[filenamenew,'_Validation of logit trained model_30percentofdata.png']);
      %saveas(Figure2,[filenamenew,'_Validation of SVM trained model_30percentofdata.fig']);%same for SVM model 
      %saveas(Figure2,[filenamenew,'_Validation of SVM trained model_30percentofdata.png']);%same for SVM model
      Rval=(sum(((score_log1-respvalidation).^2)))/(validmalignantnumber+validbenignnumber);
 
-     %Now to understand whether these predictions that the trained model did are good
-     %We will use ROC analysis to find accuracy of teh trained model in
+     %to understand whether these predictions that the trained model did are good
+     %We will use ROC analysis to find accuracy of the trained model in
      %detecting tumour.
+     %change probabilities to class 0 or 1 based on the learned threshold
+     %in SVM the responses are already classified, so suppress the below
+     %loop
+     for l=1:length(score_log1)
+            if score_log1(l)<=optimalthreshold
+                score_log1(l)=0;
+            else
+                score_log1(l)=1;
+            end
+     end
      respvalidation=logical(respvalidation);%the ground truth
      score_log1=double(score_log1);%the model's prediction
      [X,Y,T,AUC,OPT] = perfcurve(respvalidation,score_log1,'true');% this is where the ROC analysis is implemented
@@ -139,12 +164,8 @@ mat = dir('*.mat');
      %AUC is the arrea under the curve, it gives us the propability for this trained model to correctly
      %classify a random data point correclty.
      %OPT corresponds to the best threshold we can use so that we can have the
-     %best specificity and sensitivity outcome
-     optimalthreshold=T((X==OPT(1))&(Y==OPT(2)));%only for logistic regression/suppress if SVM
-     %it was a probability above which we classified as tumour/now we have 0 or
-     %1 so we cannot use it
-
-     %optimalthreshold=mdlSVM.Beta;%we use this instead, it is the pixel value identified by the SVM as the threshold above which is tumour
+     %best specificity and sensitivity outcome given the validation set
+     opt=T((X==OPT(1))&(Y==OPT(2)));%optimal probability threshold
 
      %below we vizualise the ROC curve and optimal threshold for classification
      Figure3=figure;
@@ -153,18 +174,14 @@ mat = dir('*.mat');
      plot(OPT(1),OPT(2),'ro')
      xlabel('False positive rate') 
      ylabel('True positive rate')
-     title(['ROC Curve with optimal treshold ',num2str(optimalthreshold),' indicated'])
-     %title('ROC Curve')%for SVM model, threshod is found by the model
+     title(['ROC Curve with optimal treshold ',num2str(opt),' indicated']);
      hold off
-     saveas(Figure3,[filenamenew,'_LGM_ROC curve with optimal threshold_70_30',num2str(optimalthreshold),'.fig']); 
-     saveas(Figure3,[filenamenew,'_LGM_ROC curve with optimal threshold_70_30',num2str(optimalthreshold),'.png']);
-
-     save([filenamenew,'Roc_LGM_Analysis_70_30.mat'],'X','Y','T','AUC','OPT','optimalthreshold');
-     
-     %saveas(Figure3,[filenamenew,'_SVM_ROC curve with optimal threshold_70_30.fig']); 
-     %saveas(Figure3,[filenamenew,'_SVM_ROC curve with optimal threshold_70_30.png']);
-
-     %save([filenamenew,'Roc_SVM_Analysis_70_30.mat'],'X','Y','T','AUC','OPT');
+     saveas(Figure3,[filenamenew,'_LGM_ROC curve with optimal threshold_70_30',num2str(opt),'.fig']); 
+     saveas(Figure3,[filenamenew,'_LGM_ROC curve with optimal threshold_70_30',num2str(opt),'.png']);
+     save([filenamenew,'Roc_LGM_Analysis_70_30.mat'],'X','Y','T','AUC','OPT','opt');
+     %saveas(Figure3,[filenamenew,'_SVM_ROC curve with optimal threshold_70_30',num2str(opt),'.fig']); 
+     %saveas(Figure3,[filenamenew,'_SVM_ROC curve with optimal threshold_70_30',num2str(opt),'.png']);
+     %save([filenamenew,'Roc_SVM_Analysis_70_30.mat'],'X','Y','T','AUC','OPT','opt');
 
      %The below code will show the result as a green pseudocolour map on top of the colour image, the LR classification for tumour for every pixel is converted to 
      %transparency of the green map where optimal threshold found by LR model is used as the cut-off
@@ -173,8 +190,7 @@ mat = dir('*.mat');
      cd('/Users/marialeiloglou/Documents/GitHub/Thesis/Appendix_5/data');%change current folder
      imf=imread([filenamenew,'_fluorescence.tiff']);%load fluorescence image
      dark=imread([filenamenew,'_dark.tiff']);%load dark image
-
-     imf=imf-dark;
+     imf=imf-dark;%ambient light correction
      [s1,s2]=size(imf);
      imc=imread([filenamenew,'_colour.tiff']);%load colour image
 
@@ -182,8 +198,7 @@ mat = dir('*.mat');
      %The below for loop predicts a classification(tumour or healthy) for each
      %one of the pixels in fluorescence image
      propabilitymap=zeros(s1,s2);%preallocation for the pseudocolour map
-     %one pixel corresponds to this value in [mm]
-     pixeldimension=[0.0422164];
+     pixeldimension=[0.0422164];%one pixel corresponds to this value in [mm]
      res=1./((50*64).*pixeldimension);%resolution input to function raPsd2d
      res1=res(q);
      cd('/Users/marialeiloglou/Documents/GitHub/Thesis/Appendix_5');
@@ -202,7 +217,7 @@ mat = dir('*.mat');
      %in the SVM model we don't need the below as our values are 0 or 1
 
      %{
-     %the below for loop zeros all the pixel values that are classified below 
+     %optional- the below for loop zeros all the probability values that are below 
      %the optimal classification threshold
      for x=1:s1
         for y=1:s2
