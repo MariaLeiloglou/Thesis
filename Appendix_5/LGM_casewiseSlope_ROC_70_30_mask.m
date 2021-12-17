@@ -10,7 +10,7 @@ close all;
 cd('/Users/marialeiloglou/Documents/GitHub/Thesis/Appendix_5/data');
 
 
-%find the mat files with the vales in the folder
+%find the mat files with the values in the folder
 mat = dir('*.mat');
 
 
@@ -23,7 +23,7 @@ mat = dir('*.mat');
      healthyslope = healthyslope(randperm(length(healthyslope)));%shuffle
      healthy=length(healthyslope); %find number of healthy values
      tumour=length(tumourslope);%find number of tumour values  
-     %name of the mat file to use
+     % keep the name of the mat file to use
      namevalidation=mat(q).name;
      str=convertCharsToStrings(namevalidation);
      Newstr=split(str,"_");
@@ -41,7 +41,7 @@ mat = dir('*.mat');
      pred(1,1:malignantnumber)=tumourslope;%we put the tumour values
      pred(1,1+malignantnumber:malignantnumber+benignnumber)=healthyslope;%we put the healthy values
 
-     %train in random 70% of this data and validate in random 30% of this data
+     %train in random 70% and validate in random 30% of the data
 
      trainmalignantnumber=round(malignantnumber/1.43);%100/70->number of 70% of tumour data
      trainbenignnumber=round(benignnumber/1.43);%100/70->number of 70% of healthy data
@@ -71,12 +71,10 @@ mat = dir('*.mat');
      
      %the below trains the model
      mdl=fitglm(predtrain,resptrain,'Distribution','binomial');%this line trains the logistic regression model
-     cd('/Users/marialeiloglou/Documents/GitHub/Thesis/Appendix_5/Results/TextureSlope_Case_Wise');%change current folder
-     save([filenamenew,'_TEXTURE_logitmodel_70_30.mat'],'mdl');%we save the trained model
      %mdl=fitcsvm(predtrain,resptrain,'Standardize',true);%this line trains the SVM model
      %mdlSVM = fitPosterior(mdl);%this line trains the SVM model
      
-     %find the classification threshold 
+     %find a classification threshold 
      score_training=predict(mdl,predtrain);%use training data and trained model to predict responses
      resptrain=logical(resptrain);%the ground truth
      score_training=double(score_training);%the model's prediction
@@ -86,16 +84,15 @@ mat = dir('*.mat');
      fit_slope=mdl.Coefficients{2,1};%this is the logit fit's slope
      optimalthreshold=((log(opt1/(1-opt1)))-fit_intercept)/(fit_slope);%this is the threshold but the predictor/ slope value threshold
     
-     %threshold=-(mdlSVM.Bias)/mdlSVM.Beta;%for SVM
+     %threshold=-(mdlSVM.Bias)/mdlSVM.Beta;%for SVM model, threshold slope value (but standardized value)
      %sd=std(predtrain);%for SVM
      %av=mean(predtrain);%for SVM
-     %optimalthreshold=threshold*sd+av;%identified by the SVM as the threshold above which is tumour
-     %cd('/Users/marialeiloglou/Documents/GitHub/Thesis/Appendix_5/Results/TextureSlope_Case_Wise');%change current folder
+     %optimalthreshold=threshold*sd+av;%identified by the SVM as the
+     %%threshold above which is tumour (recovered from standardization)
+     cd('/Users/marialeiloglou/Documents/GitHub/Thesis/Appendix_5/Results/TextureSlope_Case_Wise');%change current folder
+     save([filenamenew,'_TEXTURE_logitmodel_70_30.mat'],'mdl','optimalthreshold','opt1');%we save the trained model
      %save([filenamenew,'_TEXTURE_SVMmodel_70_30.mat'],'mdlSVM','optimalthreshold');%we save the trained model
      
-  
-
-
      %The below visualizes the training data and the OUTCOME OF THE TRAINED
      %model on the same data/this will help us understand where the learned threshold
      %is.
@@ -140,16 +137,16 @@ mat = dir('*.mat');
      saveas(Figure2,[filenamenew,'_Validation of logit trained model_30percentofdata.png']);
      %saveas(Figure2,[filenamenew,'_Validation of SVM trained model_30percentofdata.fig']);%same for SVM model 
      %saveas(Figure2,[filenamenew,'_Validation of SVM trained model_30percentofdata.png']);%same for SVM model
-     Rval=(sum(((score_log1-respvalidation).^2)))/(validmalignantnumber+validbenignnumber);
+     Rval=(sum(((score_log1-respvalidation).^2)))/(validmalignantnumber+validbenignnumber);%deviation of prediction from the ground truth-not used
 
      %to understand whether these predictions that the trained model did are good
      %We will use ROC analysis to find accuracy of the trained model in
      %detecting tumour.
-     %change probabilities to class 0 or 1 based on the learned threshold
+     %optional to change probabilities (from regression) to class 0 or 1 (classification) based on the learned threshold
      %in SVM the responses are already classified, so suppress the below
      %loop
      for l=1:length(score_log1)
-            if score_log1(l)<=optimalthreshold
+            if score_log1(l)<=opt1%this is the probability threshold
                 score_log1(l)=0;
             else
                 score_log1(l)=1;
@@ -163,28 +160,26 @@ mat = dir('*.mat');
      %are the corresponding 1-specificity and sensitivity scores for every classification threshold, respectively 
      %AUC is the arrea under the curve, it gives us the propability for this trained model to correctly
      %classify a random data point correclty.
-     %OPT corresponds to the best threshold we can use so that we can have the
-     %best specificity and sensitivity outcome given the validation set
-     opt=T((X==OPT(1))&(Y==OPT(2)));%optimal probability threshold
 
-     %below we vizualise the ROC curve and optimal threshold for classification
+
+     %below we vizualise the ROC curve
      Figure3=figure;
      plot(X,Y)
      hold on
      plot(OPT(1),OPT(2),'ro')
      xlabel('False positive rate') 
      ylabel('True positive rate')
-     title(['ROC Curve with optimal treshold ',num2str(opt),' indicated']);
+     title(['ROC Curve with optimal predictor treshold ',num2str(optimalthreshold),' indicated']);
      hold off
-     saveas(Figure3,[filenamenew,'_LGM_ROC curve with optimal threshold_70_30',num2str(opt),'.fig']); 
-     saveas(Figure3,[filenamenew,'_LGM_ROC curve with optimal threshold_70_30',num2str(opt),'.png']);
-     save([filenamenew,'Roc_LGM_Analysis_70_30.mat'],'X','Y','T','AUC','OPT','opt');
-     %saveas(Figure3,[filenamenew,'_SVM_ROC curve with optimal threshold_70_30',num2str(opt),'.fig']); 
-     %saveas(Figure3,[filenamenew,'_SVM_ROC curve with optimal threshold_70_30',num2str(opt),'.png']);
-     %save([filenamenew,'Roc_SVM_Analysis_70_30.mat'],'X','Y','T','AUC','OPT','opt');
+     saveas(Figure3,[filenamenew,'_LGM_ROC curve with optimal threshold_70_30_',num2str(optimalthreshold),'.fig']); 
+     saveas(Figure3,[filenamenew,'_LGM_ROC curve with optimal threshold_70_30_',num2str(optimalthreshold),'.png']);
+     save([filenamenew,'Roc_LGM_Analysis_70_30.mat'],'X','Y','T','AUC','optimalthreshold','opt1');
+     %saveas(Figure3,[filenamenew,'_SVM_ROC curve with optimal threshold_70_30_',num2str(optimalthreshold),'.fig']); 
+     %saveas(Figure3,[filenamenew,'_SVM_ROC curve with optimal threshold_70_30_',num2str(optimalthreshold),'.png']);
+     %save([filenamenew,'Roc_SVM_Analysis_70_30.mat'],'X','Y','T','AUC','optimalthreshold');
 
-     %The below code will show the result as a green pseudocolour map on top of the colour image, the LR classification for tumour for every pixel is converted to 
-     %transparency of the green map where optimal threshold found by LR model is used as the cut-off
+     %The below code will show the result as a green pseudocolour map on top of the colour image, classification for tumour for every pixel is converted to 
+     %transparency of the green map where optimal threshold found by model is used as the cut-off
      %threshold-meaning the transparency of the green map is 100% for the pixels
      %classified below this threshold 
      cd('/Users/marialeiloglou/Documents/GitHub/Thesis/Appendix_5/data');%change current folder
@@ -221,7 +216,7 @@ mat = dir('*.mat');
      to class
      for x=1:s1
         for y=1:s2
-            if propabilitymap(x,y)<=optimalthreshold
+            if propabilitymap(x,y)<=opt1
                 propabilitymap(x,y)=0;
             else
                 propabilitymap(x,y)=1;
@@ -240,7 +235,7 @@ mat = dir('*.mat');
      %The below demonstrates the classification of the trained model
      %BE CAREFUL the model has been trained/validated in 70%/30% of the ground truth data
      %from this image. This means that: 1) We do not use this to validate the model's performance 
-     %as inn the below step we essentially apply the model partially on the same data we used for training 
+     %as in the below step we essentially apply the model partially on the same data we used for training 
      %2) We cannot compare the below overlay outcome with the validation AUC result
      % since in the below step we apply the model on all ground truth data
      %plus the rest of unknown data in the image while the validation is done
