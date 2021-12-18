@@ -1,0 +1,92 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1504\cocoasubrtf840
+{\fonttbl\f0\fswiss\fcharset0 Helvetica;\f1\fmodern\fcharset0 Courier;}
+{\colortbl;\red255\green255\blue255;\red0\green0\blue0;}
+{\*\expandedcolortbl;;\csgenericrgb\c0\c0\c0;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww10800\viewh8400\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf2 Folder \'93Data\'94 contains:\
+ Folder: \'93Images\'94 contains all the images to be used from 3 ex-vivo specimens\
+ Folder: \'94masks\'94 contains all the masks that remove the background of the above mentioned images\
+ Folder: \'93Normalised_pixel_values_Results\'94 contains the extracted normalised pixel values from the ground truth healthy and tumour regions of the above mentioned images\
+ Folder: \'93Slope_Intercept_Results\'94 contains the extracted slope of PSD values from the ground truth healthy and tumour regions of the above mentioned images\
+\
+\
+\
+Folder \'93Results\'94 contains: \
+ Folder: \'93Double_features\'94 contains the extracted combined features (PSD curves\'92 slope and normalised pixel values) for each one of the images mentioned above to be used for training and validation of the logistic regression model.\
+ Folder: \'93LGM_LOO_double_features\'94 contains the figures of training/validation/ROC curve demonstrating the data and trained model\'92s predictions during training and validation. The folder contains also the files: \'93'Roc_Analysis_',filenamenew,'_LOO.mat\'92\'94 with the saved variables:\
+\pard\pardeftab720\partightenfactor0
+\cf2 \'91X\'92:1-specificity\
+\'92Y\'92:sensitivity\
+\'92T\'92: thresholds,\
+\'92AUC\'92: accuracy\
+\'91optimalthreshold\'92: learned probability threshold for classification\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+\cf2 \'91OPT\'92: optimal operating point\
+\cf0   Folder: \'93Overlays\'94 contains the final overlay of the pseudo colour map indicating the suspicious for tumour areas in the colour images
+\f1 \
+
+\f0 \cf2 \
+\
+\
+code \'93combined_loo_PV_SLope_29_07_2021_ex_vivo.m\'94:\
+validate the logistic regression model when both the slope of PSD curves and the normalised fluorescence pixel values are used as predictors in a LOOCV approach with the help of ROC analysis, input/output is explained below:\
+\
+\
+\
+-input from the folder \'93Data\'94:\
+\
+ the images to be used from 3 ex-vivo specimens in the folder \'93Images\'94\
+ the masks that remove the background of the above mentioned images in the folder \'93masks\'94\
+ the extracted normalised pixel values from the ground truth healthy and tumour regions of the above  mentioned images from the folder  \'93Normalised_pixel_values_Results\'94\
+ the extracted slope of PSD values from the ground truth healthy and tumour regions of the above mentioned images in the folder \'93Slope_Intercept_Results\'94 \
+ \
+\
+\
+-output is saved in folder \'91Results\'92:\
+\
+filenamenew,\'92antdoublefeatures.mat\'92: contains the extracted combined features (PSD curves\'92 slope and normalised pixel values) for each one of the images mentioned above to be used for training and validation of the logistic regression model in the folder \'93Double_features\'94 \
+\
+\'91logitmodel_LOO_\'92, filenamenew,\'92PV03ant.mat\'92:  contains the trained model in the folder \'93LGM_LOO_double_features\'94 \
+\
+\'91Roc_Analysis_',filenamenew,'_LOO.mat\'92\'92  contains the below variables in the folder \'93LGM_LOO_double_features\'94. \
+\pard\pardeftab720\partightenfactor0
+\cf2 \'91X\'92:1-specificity\
+\'92Y\'92:sensitivity\
+\'92T\'92: thresholds,\
+\'92AUC\'92: accuracy\
+\'91optimalthreshold\'92: learned probability threshold for classification\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+\cf2 \'91OPT\'92: optimal operating point\
+\
+Figure: \'91Trained model_LOOPV\'92,filenamenew,\'92.png\'92 demonstrates the training data and the prediction outcome in the folder \'93LGM_LOO_double_features\'94. \
+\
+Figure: \'91Validation of trained model_LOO\'92,filenamenew,\'92ant.png\'92 demonstrates the validation data and the prediction outcome in the folder \'93LGM_LOO_double_features\'94. \
+\
+Figure: \'91ROC curve\'92, filenamenew,\'92with optimal probability threshold_LOO0.55526.png\'92 demonstrates the ROC curve used for the validation in the folder \'93LGM_LOO_double_features\'94. \
+\
+Figure: \'91Overlay_lgm\'92,filenamenew,\'92with optimal probability threshold_LOO0.55526.png\'92 is the overall of the pseudo colour map on top of the colour image in the folder \'91Overlays\'92.\
+\
+Figure \'91Fluorescence_lgm\'92,filenamenew,\'92with optimal probability threshold_LOO0.55526.png is the processed fluorescence image after we apply the classification learned threshold in the folder \'91Overlays\'92.\
+
+\f1\fs20 \cf2 \
+\pard\pardeftab720\partightenfactor0
+
+\fs24 \cf0 \
+\
+\
+\
+\
+\pard\pardeftab720\partightenfactor0
+
+\fs20 \cf0 \
+\pard\pardeftab720\partightenfactor0
+
+\fs24 \cf0 \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+\cf0 \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0 \cf0 \
+}
